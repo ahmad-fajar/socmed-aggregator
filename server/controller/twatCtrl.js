@@ -29,8 +29,9 @@ exports.defaultTimeline = (req, res) => {
 
 
 exports.otherUserTimeline = (req, res) => {
+  console.log(req.query)
   oauth.get(
-    `https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=${req.query.q}`,
+    `https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=${req.query.screen_name}`,
     process.env.USER_TOKEN, //test user token
     process.env.USER_SECRET, //test user secret
     function (e, data, r){
@@ -41,8 +42,9 @@ exports.otherUserTimeline = (req, res) => {
 
 
 exports.post = (req, res) => {
+  // console.log(req.body)
   oauth.post(
-    `https://api.twitter.com/1.1/statuses/update.json?status=${req.body.text}`,
+    `https://api.twitter.com/1.1/statuses/update.json?status=${req.body.status}`,
     process.env.USER_TOKEN, //test user token
     process.env.USER_SECRET, //test user secret
     req.body.text,

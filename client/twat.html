@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style media="screen">
+      .myInput {
+        width:30%;
+        -webkit-transition:width 0.3s ease-in-out;
+      }
+      .myInput:focus {
+        width:100%;
+        -webkit-transition:width 0.5s ease-in-out;
+      }
+      .button {
+        display: inline-block;
+        background: #4285f4;
+        color: #fff;
+        text-transform: uppercase;
+        padding: 10px 30px;
+        border-radius: 5px;
+        box-shadow: 0px 17px 10px -10px rgba(0, 0, 0, 0.4);
+        cursor: pointer;
+        -webkit-transition: all ease-in-out 300ms;
+        transition: all ease-in-out 300ms;
+      }
+      .button:hover {
+        box-shadow: 0px 37px 20px -20px rgba(0, 0, 0, 0.2);
+        -webkit-transform: translate(0px, -10px) scale(1.2);
+                transform: translate(0px, -10px) scale(1.2);
+      }
+    </style>
+    <meta charset="utf-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <title>twatter!</title>
+  </head>
+  <body>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+            <div class="jumbotron">
+                <h2>Twatters!</h2>
+
+                <!-- new twatt -->
+                <table>
+                  <tr>
+                    <form class="new-twatt" action="#">
+                      <input class="form-control input-lg myInput" id="new-twatt-text" placeholder="New Twatt!" type="text">
+                      <button class="button" type="submit">twatt!</button>
+                    </form>
+                  </tr>
+                  <tr id="new-twatt-entry">
+                    <fieldset>
+                      <legend> New Twatt! </legend>
+                      <!-- appned new twatt -->
+                    </fieldset>
+                  </tr>
+                </table>
+                <br><br>
+            </div>
+
+            <!-- Trending -->
+            <div class="col-md-4">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Trending</h3>
+                    </div>
+                    <ul class="list-group trending-list">
+                      <!-- append trending -->
+                    </ul>
+                </div>
+            </div>
+
+
+            <!-- Timeline -->
+            <div class="col-md-4">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Timeline</h3>
+                    </div>
+                    <ul class="list-group timeline-list">
+                      <!-- append timeline -->
+                    </ul>
+                </div>
+            </div>
+
+
+            <!-- Other's Timeline -->
+            <div class="col-md-4">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Other User's Timeline</h3>
+                    </div>
+                    <form class="other-user" action="#">
+                      <input class="form-control input-lg myInput" id="other-user" placeholder="Insert other user's display name" type="text">
+                      <button class="button" type="submit">find</button>
+                    </form>
+                    <ul class="list-group other-user-list">
+                      <!-- append timeline -->
+                    </ul>
+                </div>
+            </div>
+
+
+        </div>
+      </div>
+    </div>
+
+
+    <script type="text/javascript">
+
+      // post new twatt
+      $('form.new-twatt').submit(eventHandler => {
+        // console.log($('#new-twatt-text').val());
+        $('#new-twatt-entry').empty()
+        eventHandler.preventDefault()
+        axios.post('http://localhost:3000/twatt/new-twatt', {
+          status : $('#new-twatt-text').val()
+        })
+        .then(twatt => {
+          // console.log(twatt)
+          $('#new-twatt-entry').append(
+            `<p>${twatt.data.text}</p>`
+          )
+        })
+        .catch(err => {
+          console.log(err);
+        })
+      });
+
+      //trending
+      $('document').ready(() => {
+        // alert('aaa')
+        axios.get('http://localhost:3000/twatt/trending')
+        .then(trending => {
+          // console.log(trending.data[0].trends)
+          trending.data[0].trends.forEach(list => {
+            // console.log(list.name);
+            if(list.tweet_volume == null) list.tweet_volume = 'N/A'
+            $('.trending-list').append(
+              `<li class="list-group-item">
+                <strong><a href="${list.url}">${list.name}</a></strong>
+                <br>
+                ${list.tweet_volume} Tweets
+              </li>`
+            )
+          })
+        })
+        .catch(err => {
+          console.log(err);
+        })
+      })
+
+      //timeline
+      $('document').ready(() => {
+        axios.get('http://localhost:3000/twatt')
+        .then(timeline => {
+          // console.log(timeline)
+          timeline.data.forEach(list => {
+            $('.timeline-list').append(
+              `<li class="list-group-item">
+                <strong><a href="http://twitter.com/${list.user.screen_name}">${list.user.name}</a></strong> @${list.user.screen_name}
+                <br>
+                <a href="${list.id}" style="color: black; text-decoration: none;" >${list.text}</a>
+              </li>`
+            )
+          })
+        })
+        .catch(err => {
+          console.log(err);
+        })
+      })
+
+
+      // other user
+      $('form.other-user').submit((eventHandler) => {
+        // console.log($('#other-user').val());
+        $('.other-user-list').empty()
+        eventHandler.preventDefault()
+        axios.get('http://localhost:3000/twatt/user', {
+          params : {
+            screen_name : $('#other-user').val()
+          }
+        })
+        .then(othUser => {
+          // console.log(othUser.data[0])
+          othUser.data.forEach(list => {
+            $('.other-user-list').append(
+              `<li class="list-group-item">
+                <strong><a href="http://twitter.com/${list.user.screen_name}">${list.user.name}</a></strong> @${list.user.screen_name}
+                <br>
+                <a href="${list.id}" style="color: black; text-decoration: none;" >${list.text}</a>
+              </li>`
+            )
+          })
+        })
+        .catch(err => {
+          console.log(err);
+        })
+      })
+
+    </script>
+
+
+  </body>
+</html>

@@ -24,7 +24,7 @@ router.get('/search?:q', twatCtrl.search)
 router.get('/trending', twatCtrl.trending)
 router.get('/user?:q', twatCtrl.otherUserTimeline)
 
-router.post('/twat', twatCtrl.post)
+router.post('/new-twatt', twatCtrl.post)
 
 
 module.exports = router;
